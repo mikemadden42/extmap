@@ -3,7 +3,6 @@
 #include <string.h>
 #include <dirent.h>
 #include <stdbool.h>
-#include <ctype.h>
 
 // Struct to hold a list of files for a specific extension
 typedef struct {
