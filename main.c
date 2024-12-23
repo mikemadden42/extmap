@@ -18,7 +18,8 @@ void add_file(FileGroup *group, const char *filename) {
     }
     if (group->count == group->capacity) {
         group->capacity = group->capacity == 0 ? 10 : group->capacity * 2;
-        char **new_files = realloc(group->files, group->capacity * sizeof(char *));
+        char **new_files =
+            realloc(group->files, group->capacity * sizeof(char *));
         if (new_files == NULL) {
             fprintf(stderr, "Memory allocation failed\n");
             return;
@@ -118,7 +119,8 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
         if (!group) {
             if (group_count == group_capacity) {
                 group_capacity = group_capacity == 0 ? 10 : group_capacity * 2;
-                FileGroup *new_groups = realloc(groups, group_capacity * sizeof(FileGroup));
+                FileGroup *new_groups =
+                    realloc(groups, group_capacity * sizeof(FileGroup));
                 if (new_groups == NULL) {
                     fprintf(stderr, "Memory allocation failed\n");
                     // Clean up and return
@@ -159,7 +161,8 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
     // Sort groups and files within groups
     qsort(groups, group_count, sizeof(FileGroup), compare_groups);
     for (size_t i = 0; i < group_count; i++) {
-        qsort(groups[i].files, groups[i].count, sizeof(char *), compare_strings);
+        qsort(groups[i].files, groups[i].count, sizeof(char *),
+              compare_strings);
     }
 
     // Print results
