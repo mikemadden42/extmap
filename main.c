@@ -13,9 +13,17 @@ typedef struct {
 } FileGroup;
 
 void add_file(FileGroup *group, const char *filename) {
+    if (group == NULL || filename == NULL) {
+        return;  // Or handle error appropriately
+    }
     if (group->count == group->capacity) {
         group->capacity = group->capacity == 0 ? 10 : group->capacity * 2;
-        group->files = realloc(group->files, group->capacity * sizeof(char *));
+        char **new_files = realloc(group->files, group->capacity * sizeof(char *));
+        if (new_files == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            return;
+        }
+        group->files = new_files;
     }
     group->files[group->count++] = strdup(filename);
 }
@@ -31,6 +39,7 @@ int compare_groups(const void *a, const void *b) {
 }
 
 void free_file_group(const FileGroup *group) {
+    if (group == NULL) return;
     for (size_t i = 0; i < group->count; i++) {
         free(group->files[i]);
     }
@@ -39,11 +48,19 @@ void free_file_group(const FileGroup *group) {
 }
 
 char *get_file_extension(const char *filename) {
+    if (filename == NULL) {
+        return strdup("noext");
+    }
     const char *dot = strrchr(filename, '.');
     return dot ? strdup(dot + 1) : strdup("noext");
 }
 
 void list_files_by_extension(const char *directory, bool show_hidden) {
+    if (directory == NULL) {
+        fprintf(stderr, "Directory path is NULL\n");
+        return;
+    }
+
     DIR *dir = opendir(directory);
     if (!dir) {
         perror("Failed to open directory");
@@ -64,6 +81,10 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
         }
 
         char *extension = get_file_extension(entry->d_name);
+        if (extension == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            continue;
+        }
 
         // Find or create a group for this extension
         FileGroup *group = NULL;
@@ -77,7 +98,19 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
         if (!group) {
             if (group_count == group_capacity) {
                 group_capacity = group_capacity == 0 ? 10 : group_capacity * 2;
-                groups = realloc(groups, group_capacity * sizeof(FileGroup));
+                FileGroup *new_groups = realloc(groups, group_capacity * sizeof(FileGroup));
+                if (new_groups == NULL) {
+                    fprintf(stderr, "Memory allocation failed\n");
+                    // Clean up and return
+                    for (size_t i = 0; i < group_count; i++) {
+                        free_file_group(&groups[i]);
+                    }
+                    free(groups);
+                    free(extension);
+                    closedir(dir);
+                    return;
+                }
+                groups = new_groups;
             }
             groups[group_count].extension = extension;
             groups[group_count].files = NULL;
@@ -93,11 +126,15 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
 
     closedir(dir);
 
+    if (groups == NULL) {
+        // No files found or all were directories
+        return;
+    }
+
     // Sort groups and files within groups
     qsort(groups, group_count, sizeof(FileGroup), compare_groups);
     for (size_t i = 0; i < group_count; i++) {
-        qsort(groups[i].files, groups[i].count, sizeof(char *),
-              compare_strings);
+        qsort(groups[i].files, groups[i].count, sizeof(char *), compare_strings);
     }
 
     // Print results
@@ -117,6 +154,11 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
 }
 
 int main(int argc, char *argv[]) {
+    if (argv == NULL) {
+        fprintf(stderr, "argv is NULL\n");
+        return EXIT_FAILURE;
+    }
+
     const char *directory = ".";
     bool show_hidden = false;
 
