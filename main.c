@@ -30,7 +30,7 @@ int compare_groups(const void *a, const void *b) {
     return strcmp(groupA->extension, groupB->extension);
 }
 
-void free_file_group(FileGroup *group) {
+void free_file_group(const FileGroup *group) {
     for (size_t i = 0; i < group->count; i++) {
         free(group->files[i]);
     }
