@@ -1,8 +1,8 @@
+#include <dirent.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
-#include <stdbool.h>
 
 // Struct to hold a list of files for a specific extension
 typedef struct {
@@ -96,7 +96,8 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
     // Sort groups and files within groups
     qsort(groups, group_count, sizeof(FileGroup), compare_groups);
     for (size_t i = 0; i < group_count; i++) {
-        qsort(groups[i].files, groups[i].count, sizeof(char *), compare_strings);
+        qsort(groups[i].files, groups[i].count, sizeof(char *),
+              compare_strings);
     }
 
     // Print results
