@@ -25,7 +25,12 @@ void add_file(FileGroup *group, const char *filename) {
         }
         group->files = new_files;
     }
-    group->files[group->count++] = strdup(filename);
+    char *new_filename = strdup(filename);
+    if (new_filename == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return;
+    }
+    group->files[group->count++] = new_filename;
 }
 
 int compare_strings(const void *a, const void *b) {
@@ -49,10 +54,20 @@ void free_file_group(const FileGroup *group) {
 
 char *get_file_extension(const char *filename) {
     if (filename == NULL) {
-        return strdup("noext");
+        char *noext = strdup("noext");
+        if (noext == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            return NULL;
+        }
+        return noext;
     }
     const char *dot = strrchr(filename, '.');
-    return dot ? strdup(dot + 1) : strdup("noext");
+    char *result = dot ? strdup(dot + 1) : strdup("noext");
+    if (result == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return NULL;
+    }
+    return result;
 }
 
 void list_files_by_extension(const char *directory, bool show_hidden) {
@@ -72,6 +87,11 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
 
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name == NULL) {
+            fprintf(stderr, "Directory entry name is NULL\n");
+            continue;
+        }
+
         if (!show_hidden && entry->d_name[0] == '.') {
             continue;
         }
@@ -119,6 +139,11 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
             group = &groups[group_count++];
         } else {
             free(extension);
+        }
+
+        if (entry->d_name == NULL) {
+            fprintf(stderr, "Directory entry name is NULL\n");
+            continue;
         }
 
         add_file(group, entry->d_name);
