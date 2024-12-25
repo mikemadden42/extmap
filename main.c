@@ -88,7 +88,7 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
 
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name == NULL) {
+        if (entry->d_name[0] == '\0') {
             fprintf(stderr, "Directory entry name is NULL\n");
             continue;
         }
@@ -143,7 +143,7 @@ void list_files_by_extension(const char *directory, bool show_hidden) {
             free(extension);
         }
 
-        if (entry->d_name == NULL) {
+        if (entry->d_name[0] == '\0') {
             fprintf(stderr, "Directory entry name is NULL\n");
             continue;
         }
